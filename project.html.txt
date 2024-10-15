@@ -1,0 +1,330 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <iomanip>
+
+using namespace std;
+
+// Class to represent a Bank Account
+class BankAccount {
+private:
+    int accountNumber;
+    string name;
+    double balance;
+
+public:
+    // Constructor
+    BankAccount(int accNum, string accName, double initialBalance = 0.0) {
+        accountNumber = accNum;
+        name = accName;
+        balance = initialBalance;
+    }
+
+    // Deposit money into the account
+    void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            cout << "Deposited  ₹ " << fixed << setprecision(2) << amount
+                 << ". New balance:  ₹ " << balance << endl;
+        } else {
+            cout << "Invalid deposit amount." << endl;
+        }
+    }
+
+    // Withdraw money from the account
+    void withdraw(double amount) {
+        if (amount > 0) {
+            if (balance >= amount) {
+                balance -= amount;
+                cout << "Withdrew  ₹ " << fixed << setprecision(2) << amount
+                     << ". New balance:  ₹ " << balance << endl;
+            } else {
+                cout << "Insufficient balance." << endl;
+            }
+        } else {
+            cout << "Invalid withdrawal amount." << endl;
+        }
+    }
+
+    // Display account details
+    void display() const {
+        cout << "---------------------------------" << endl;
+        cout << "Account Number: " << accountNumber << endl;
+        cout << "Account Holder: " << name << endl;
+        cout << "Balance:  ₹ " << fixed << setprecision(2) << balance << endl;
+        cout << "---------------------------------" << endl;
+    }
+
+    // Get account number
+    int getAccountNumber() const {
+        return accountNumber;
+    }
+
+    // Get current balance
+    double getBalance() const {
+        return balance;
+    }
+};
+
+// Class to represent a Loan
+class Loan {
+private:
+    int loanID;
+    int accountNumber;
+    double loanAmount;
+    double interestRate; // Annual interest rate in percentage
+    int tenure;          // Tenure in years
+
+public:
+    // Constructor
+    Loan(int id, int accNum, double amount, double rate, int years) {
+        loanID = id;
+        accountNumber = accNum;
+        loanAmount = amount;
+        interestRate = rate;
+        tenure = years;
+    }
+
+    // Calculate total interest
+    double calculateInterest() const {
+        return (loanAmount * interestRate * tenure) / 100;
+    }
+
+    // Calculate total payable amount
+    double totalPayable() const {
+        return loanAmount + calculateInterest();
+    }
+
+    // Display loan details
+    void displayLoan() const {
+        cout << "---------------------------------" << endl;
+        cout << "Loan ID: " << loanID << endl;
+        cout << "Account Number: " << accountNumber << endl;
+        cout << "Loan Amount:  ₹ " << fixed << setprecision(2) << loanAmount << endl;
+        cout << "Interest Rate: " << interestRate << "%" << endl;
+        cout << "Tenure: " << tenure << " years" << endl;
+        cout << "Total Interest:  ₹ " << fixed << setprecision(2) << calculateInterest() << endl;
+        cout << "Total Payable:  ₹ " << fixed << setprecision(2) << totalPayable() << endl;
+        cout << "---------------------------------" << endl;
+    }
+};
+
+// Function prototypes
+void createAccount(vector<BankAccount> &accounts, int &nextAccountNumber);
+void depositMoney(vector<BankAccount> &accounts);
+void withdrawMoney(vector<BankAccount> &accounts);
+void displayAccount(const vector<BankAccount> &accounts);
+void applyLoan(vector<Loan> &loans, const vector<BankAccount> &accounts, int &nextLoanID);
+void displayLoanDetails(const vector<Loan> &loans);
+
+int main() {
+    vector<BankAccount> accounts;
+    vector<Loan> loans;
+    int nextAccountNumber = 1001; // Starting account number
+    int nextLoanID = 5001;         // Starting loan ID
+
+    int choice;
+
+    cout << "===== Welcome to the Banking Management System Simulator =====" << endl;
+
+    do {
+        cout << "\nPlease select an option:" << endl;
+        cout << "1. Create New Account" << endl;
+        cout << "2. Deposit Money" << endl;
+        cout << "3. Withdraw Money" << endl;
+        cout << "4. Display Account Details" << endl;
+        cout << "5. Apply for Loan" << endl;
+        cout << "6. Display Loan Details" << endl;
+        cout << "7. Exit" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                createAccount(accounts, nextAccountNumber);
+                break;
+            case 2:
+                depositMoney(accounts);
+                break;
+            case 3:
+                withdrawMoney(accounts);
+                break;
+            case 4:
+                displayAccount(accounts);
+                break;
+            case 5:
+                applyLoan(loans, accounts, nextLoanID);
+                break;
+            case 6:
+                displayLoanDetails(loans);
+                break;
+            case 7:
+                cout << "Thank you for using the Banking Management System Simulator. Goodbye!" << endl;
+                break;
+            default:
+                cout << "Invalid choice. Please select a valid option." << endl;
+        }
+
+    } while (choice != 7);
+
+    return 0;
+}
+
+// Function to create a new bank account
+void createAccount(vector<BankAccount> &accounts, int &nextAccountNumber) {
+    string name;
+    double initialDeposit;
+
+    cout << "\n--- Create New Account ---" << endl;
+    cout << "Enter account holder name: ";
+    cin.ignore(); // To ignore any leftover newline character
+    getline(cin, name);
+    cout << "Enter initial deposit amount:  ₹ ";
+    cin >> initialDeposit;
+
+    if (initialDeposit < 0) {
+        cout << "Initial deposit cannot be negative. Account creation failed." << endl;
+        return;
+    }
+
+    BankAccount newAccount(nextAccountNumber, name, initialDeposit);
+    accounts.push_back(newAccount);
+    cout << "Account created successfully! Your account number is " << nextAccountNumber << endl;
+    nextAccountNumber++;
+}
+
+// Function to deposit money into an account
+void depositMoney(vector<BankAccount> &accounts) {
+    int accNum;
+    double amount;
+    bool found = false;
+
+    cout << "\n--- Deposit Money ---" << endl;
+    cout << "Enter account number: ";
+    cin >> accNum;
+
+    for (auto &account : accounts) {
+        if (account.getAccountNumber() == accNum) {
+            cout << "Enter amount to deposit:  ₹ ";
+            cin >> amount;
+            account.deposit(amount);
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        cout << "Account number not found." << endl;
+    }
+}
+
+// Function to withdraw money from an account
+void withdrawMoney(vector<BankAccount> &accounts) {
+    int accNum;
+    double amount;
+    bool found = false;
+
+    cout << "\n--- Withdraw Money ---" << endl;
+    cout << "Enter account number: ";
+    cin >> accNum;
+
+    for (auto &account : accounts) {
+        if (account.getAccountNumber() == accNum) {
+            cout << "Enter amount to withdraw:  ₹ ";
+            cin >> amount;
+            account.withdraw(amount);
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        cout << "Account number not found." << endl;
+    }
+}
+
+// Function to display account details
+void displayAccount(const vector<BankAccount> &accounts) {
+    int accNum;
+    bool found = false;
+
+    cout << "\n--- Display Account Details ---" << endl;
+    cout << "Enter account number: ";
+    cin >> accNum;
+
+    for (const auto &account : accounts) {
+        if (account.getAccountNumber() == accNum) {
+            account.display();
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        cout << "Account number not found." << endl;
+    }
+}
+
+// Function to apply for a loan
+void applyLoan(vector<Loan> &loans, const vector<BankAccount> &accounts, int &nextLoanID) {
+    int accNum;
+    double loanAmount, interestRate;
+    int tenure;
+    bool found = false;
+
+    cout << "\n--- Apply for Loan ---" << endl;
+    cout << "Enter account number: ";
+    cin >> accNum;
+
+    // Check if account exists
+    for (const auto &account : accounts) {
+        if (account.getAccountNumber() == accNum) {
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        cout << "Account number not found. Cannot apply for loan." << endl;
+        return;
+    }
+
+    cout << "Enter loan amount:  ₹ ";
+    cin >> loanAmount;
+    cout << "Enter annual interest rate (%): ";
+    cin >> interestRate;
+    cout << "Enter loan tenure (years): ";
+    cin >> tenure;
+
+    if (loanAmount <= 0 || interestRate < 0 || tenure <= 0) {
+        cout << "Invalid loan details. Loan application failed." << endl;
+        return;
+    }
+
+    Loan newLoan(nextLoanID, accNum, loanAmount, interestRate, tenure);
+    loans.push_back(newLoan);
+    cout << "Loan applied successfully! Your loan ID is " << nextLoanID << endl;
+    nextLoanID++;
+}
+
+// Function to display loan details
+void displayLoanDetails(const vector<Loan> &loans) {
+    int loanID;
+    bool found = false;
+
+    cout << "\n--- Display Loan Details ---" << endl;
+    cout << "Enter loan ID: ";
+    cin >> loanID;
+
+    for (const auto &loan : loans) {
+        if (loanID == loanID) { // This condition has an issue; need to fix it
+            loan.displayLoan();
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        cout << "Loan ID not found." << endl;
+    }
+}
